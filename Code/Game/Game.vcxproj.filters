@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Framework">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Gameplay">
+      <UniqueIdentifier>{64dab2bf-5144-4bd9-9a25-25deb1d6d6cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Framework\Generator">
+      <UniqueIdentifier>{c88b9bd9-a35d-468f-a46b-66f7a5238f4a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Gamecommon.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Main_Windows.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Block.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="BlockDefinition.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Chunk.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="World.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="BlockIterator.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="ChunkSerializer.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="ChunkUtils.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="ChunkJob.cpp">
+      <Filter>Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Generator\CaveGenerator.cpp">
+      <Filter>Framework\Generator</Filter>
+    </ClCompile>
+    <ClCompile Include="Generator\FeaturePlacer.cpp">
+      <Filter>Framework\Generator</Filter>
+    </ClCompile>
+    <ClCompile Include="Generator\SurfaceBuilder.cpp">
+      <Filter>Framework\Generator</Filter>
+    </ClCompile>
+    <ClCompile Include="Generator\WorldGenPipeline.cpp">
+      <Filter>Framework\Generator</Filter>
+    </ClCompile>
+    <ClCompile Include="Generator\TerrainGenerator.cpp">
+      <Filter>Framework\Generator</Filter>
+    </ClCompile>
+    <ClCompile Include="Generator\BiomeGenerator.cpp">
+      <Filter>Framework\Generator</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="App.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Gamecommon.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Block.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="BlockDefinition.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Chunk.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="World.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="BlockIterator.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="ChunkSerializer.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="ChunkUtils.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineBuildPreferences.hpp">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="ChunkJob.h">
+      <Filter>Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Generator\CaveGenerator.h">
+      <Filter>Framework\Generator</Filter>
+    </ClInclude>
+    <ClInclude Include="Generator\FeaturePlacer.h">
+      <Filter>Framework\Generator</Filter>
+    </ClInclude>
+    <ClInclude Include="Generator\SurfaceBuilder.h">
+      <Filter>Framework\Generator</Filter>
+    </ClInclude>
+    <ClInclude Include="Generator\WorldGenPipeline.h">
+      <Filter>Framework\Generator</Filter>
+    </ClInclude>
+    <ClInclude Include="Generator\TerrainGenerator.h">
+      <Filter>Framework\Generator</Filter>
+    </ClInclude>
+    <ClInclude Include="Generator\BiomeGenerator.h">
+      <Filter>Framework\Generator</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Protogame3D.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Protogame3D.aps" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,32 @@
+﻿#pragma once
+#include "Gamecommon.hpp"
+#include "Engine/Math/IntVec2.hpp"
+#include "Engine/Math/IntVec3.h"
+#include "Engine/Math/Vec3.hpp"
+
+// local~index
+int LocalCoordsToIndex(const IntVec3& localCoords);
+int LocalCoordsToIndex(int x, int y, int z);
+int IndexToLocalX(int index);
+int IndexToLocalY(int index);
+int IndexToLocalZ(int index);
+IntVec3 IndexToLocalCoords(int index);
+
+// world
+int GlobalCoordsToIndex(const IntVec3& globalCoords);
+int GlobalCoordsToIndex(int x, int y, int z);
+IntVec2 GetChunkCoords(const IntVec3& globalCoords);
+IntVec2 GetChunkCenter(const IntVec2& chunkCoords);
+IntVec3 GlobalCoordsToLocalCoords(const IntVec3& globalCoords);
+IntVec3 GetGlobalCoords(const IntVec2& chunkCoords, int blockIndex);
+IntVec3 GetGlobalCoords(const IntVec2& chunkCoords, const IntVec3& localCoords);
+IntVec3 GetGlobalCoords(const Vec3& position);
+
+// block
+bool IsSolid(uint8_t type);
+bool IsLiquid(uint8_t type);
+bool IsFoliage(uint8_t type);
+bool IsLog(uint8_t type);
+bool IsSnow(uint8_t type);
+bool IsNonGroundCover(uint8_t type);
+
