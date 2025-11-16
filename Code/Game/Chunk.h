@@ -8,10 +8,19 @@
 #include "Gamecommon.hpp"
 #include "Engine/Math/AABB3.hpp"
 #include "Engine/Math/IntVec2.hpp"
+#include "Engine/Math/IntVec3.h"
 #include "Generator/WorldGenPipeline.h"
 
 class World;
 class BlockIterator;
+
+struct HighlightInfo
+{
+    bool isValid = false;
+    IntVec3 blockCoords;
+    Direction face;
+};
+
 
 enum class ChunkState : int
 {
@@ -53,6 +62,7 @@ public:
 
     void Update(float deltaSeconds);
     void Render() const;
+    void RenderBlockHighlight(const IntVec3& localCoords, Direction face) const;
 
     IntVec2 GetThisChunkCoords() const { return m_chunkCoords; }
     

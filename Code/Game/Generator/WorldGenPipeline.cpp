@@ -59,8 +59,8 @@ void WorldGenPipeline::ExecuteBiomeStage(Chunk* chunk, ChunkGenData* chunkGenDat
             chunkGenData->m_biomeParams[x][y] = m_biomeGen.SampleBiomeParameters(worldX, worldY);
             chunkGenData->m_biomes[x][y] = m_biomeGen.DetermineBiome(chunkGenData->m_biomeParams[x][y]);
             //chunkGenData->m_surfaceHeights[x][y] = 
-              //  m_terrainGen.GetSurfaceHeight(worldX, worldY, chunkGenData->m_biomeParams[x][y]);
-            //TODO: 高度没什么用
+             //   m_terrainGen.GetSurfaceHeight(worldX, worldY, chunkGenData->m_biomeParams[x][y]);
+            chunkGenData->m_surfaceHeights[x][y] = 0;
         }
     }
 }
@@ -79,7 +79,8 @@ void WorldGenPipeline::ExecuteNoiseStage(Chunk* chunk, ChunkGenData* chunkGenDat
                 
                 if (z <= 1)
                 {
-                    chunk->m_blocks[idx].m_typeIndex = BLOCK_TYPE_OBSIDIAN;
+                    //chunk->m_blocks[idx].SetType(BLOCK_TYPE_OBSIDIAN);
+                    chunk->m_blocks[idx].SetType(BLOCK_TYPE_OBSIDIAN);
                     continue;
                 }
                 
@@ -94,20 +95,12 @@ void WorldGenPipeline::ExecuteNoiseStage(Chunk* chunk, ChunkGenData* chunkGenDat
                 
                 if (density < 0.0f)
                 {
-                    chunk->m_blocks[idx].m_typeIndex = BLOCK_TYPE_STONE;
+                    chunk->m_blocks[idx].SetType(BLOCK_TYPE_STONE);
+                    chunkGenData->m_surfaceHeights[x][y] = z;
                 }
                 else
                 {
-                    // ContinentalnessType con = m_biomeGen.ClassifyContinentalness(biomeParams.m_continentalness);
-                    // if (con == CONT_COAST)
-                    // {
-                    //     if (z < SEA_LEVEL_Z)
-                    //     {
-                    //         chunk->m_blocks[idx].m_typeIndex = BLOCK_TYPE_STONE;
-                    //         continue;
-                    //     }
-                    // }
-                    chunk->m_blocks[idx].m_typeIndex = BLOCK_TYPE_AIR;
+                    chunk->m_blocks[idx].SetType(BLOCK_TYPE_AIR);
                 }
             }
         }
@@ -167,8 +160,7 @@ void WorldGenPipeline::ExecuteSurfaceStage(Chunk* chunk, ChunkGenData* chunkGenD
 
 void WorldGenPipeline::ExecuteCaveStage(Chunk* chunk, ChunkGenData* chunkGenData)
 {
-    UNUSED(chunkGenData)
-    m_caveGen.CarveCaves(chunk->m_blocks, chunk->GetThisChunkCoords());
+    m_caveGen.CarveCaves(chunk->m_blocks, chunk->GetThisChunkCoords(), *chunkGenData);
 }
 
 void WorldGenPipeline::ExecuteWaterStage(Chunk* chunk, ChunkGenData* chunkGenData)
@@ -202,7 +194,7 @@ void WorldGenPipeline::ExecuteWaterStage(Chunk* chunk, ChunkGenData* chunkGenDat
                     // 只填充AIR，不填充已有的其他方块
                     if (chunk->m_blocks[idx].m_typeIndex == BLOCK_TYPE_AIR)
                     {
-                        chunk->m_blocks[idx].m_typeIndex = BLOCK_TYPE_WATER;
+                        chunk->m_blocks[idx].SetType(BLOCK_TYPE_WATER);
                     }
                     else
                     {
@@ -220,7 +212,7 @@ void WorldGenPipeline::ExecuteWaterStage(Chunk* chunk, ChunkGenData* chunkGenDat
                     int idx = LocalCoordsToIndex(x, y, z);
                     if (chunk->m_blocks[idx].m_typeIndex == BLOCK_TYPE_AIR)
                     {
-                        chunk->m_blocks[idx].m_typeIndex = BLOCK_TYPE_WATER;
+                        chunk->m_blocks[idx].SetType(BLOCK_TYPE_WATER);
                     }
                 }
             }

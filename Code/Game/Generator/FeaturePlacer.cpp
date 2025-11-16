@@ -361,7 +361,7 @@ void FeaturePlacer::PlaceTree(Chunk* chunk, int localX, int localY, int surfaceZ
             z >= 0 && z < CHUNK_SIZE_Z)
         {
             int idx = LocalCoordsToIndex(x, y, z);
-            chunk->m_blocks[idx].m_typeIndex = stamp.m_logType;
+            chunk->m_blocks[idx].SetType(stamp.m_logType);
         }
     }
     
@@ -382,7 +382,7 @@ void FeaturePlacer::PlaceTree(Chunk* chunk, int localX, int localY, int surfaceZ
                 
                 if (currentType == BLOCK_TYPE_AIR || currentType == BLOCK_TYPE_SNOW)
                 {
-                    chunk->m_blocks[idx].m_typeIndex = stamp.m_leafType;
+                    chunk->m_blocks[idx].SetType(stamp.m_leafType);
                 }
             }
         }

@@ -62,7 +62,7 @@ Chunk::~Chunk()
 
 void Chunk::InitializeLighting()
 {
-     // ===== 步骤1：标记与相邻 Chunk 接触的边界非不透明方块为脏 =====
+     // 标记与相邻 Chunk 接触的边界非不透明方块为脏 
     if (m_eastNeighbor && m_eastNeighbor->GetState() == ChunkState::ACTIVE)
     {
         for (int y = 0; y < CHUNK_SIZE_Y; y++)
@@ -193,7 +193,7 @@ void Chunk::InitializeLighting()
         }
     }
     
-    // ===== 步骤5：标记所有发光方块为脏 =====
+    // 步骤5：标记所有发光方块为脏
     for (int idx = 0; idx < CHUNK_TOTAL_BLOCKS; idx++)
     {
         Block& block = m_blocks[idx];
@@ -332,6 +332,88 @@ void Chunk::Render() const
     }
 }
 
+void Chunk::RenderBlockHighlight(const IntVec3& localCoords, Direction face) const
+{
+    // 获取方块世界坐标
+    Vec3 blockWorldPos = Vec3(
+        (float)(m_chunkCoords.x * CHUNK_SIZE_X + localCoords.x),
+        (float)(m_chunkCoords.y * CHUNK_SIZE_Y + localCoords.y),
+        (float)localCoords.z
+    );
+
+    // 稍微放大一点，避免Z-fighting
+    constexpr float OFFSET = 0.002f;
+    constexpr float LINE_THICKNESS = 0.03f;
+    
+    std::vector<Vertex_PCU> lineVertices;
+    Rgba8 highlightColor = Rgba8(0, 0, 0, 180); // 黑色半透明
+    
+    // 根据面的方向构建4条边的线框
+    Vec3 corners[4];
+    
+    switch(face) {
+        case Direction::NORTH: { // +Y
+            corners[0] = blockWorldPos + Vec3(0, 1 + OFFSET, 0);
+            corners[1] = blockWorldPos + Vec3(1, 1 + OFFSET, 0);
+            corners[2] = blockWorldPos + Vec3(1, 1 + OFFSET, 1);
+            corners[3] = blockWorldPos + Vec3(0, 1 + OFFSET, 1);
+            break;
+        }
+        case Direction::SOUTH: { // -Y
+            corners[0] = blockWorldPos + Vec3(0, -OFFSET, 0);
+            corners[1] = blockWorldPos + Vec3(0, -OFFSET, 1);
+            corners[2] = blockWorldPos + Vec3(1, -OFFSET, 1);
+            corners[3] = blockWorldPos + Vec3(1, -OFFSET, 0);
+            break;
+        }
+        case Direction::EAST: { // +X
+            corners[0] = blockWorldPos + Vec3(1 + OFFSET, 0, 0);
+            corners[1] = blockWorldPos + Vec3(1 + OFFSET, 1, 0);
+            corners[2] = blockWorldPos + Vec3(1 + OFFSET, 1, 1);
+            corners[3] = blockWorldPos + Vec3(1 + OFFSET, 0, 1);
+            break;
+        }
+        case Direction::WEST: { // -X
+            corners[0] = blockWorldPos + Vec3(-OFFSET, 0, 0);
+            corners[1] = blockWorldPos + Vec3(-OFFSET, 0, 1);
+            corners[2] = blockWorldPos + Vec3(-OFFSET, 1, 1);
+            corners[3] = blockWorldPos + Vec3(-OFFSET, 1, 0);
+            break;
+        }
+        case Direction::UP: { // +Z
+            corners[0] = blockWorldPos + Vec3(0, 0, 1 + OFFSET);
+            corners[1] = blockWorldPos + Vec3(1, 0, 1 + OFFSET);
+            corners[2] = blockWorldPos + Vec3(1, 1, 1 + OFFSET);
+            corners[3] = blockWorldPos + Vec3(0, 1, 1 + OFFSET);
+            break;
+        }
+        case Direction::DOWN: { // -Z
+            corners[0] = blockWorldPos + Vec3(0, 0, -OFFSET);
+            corners[1] = blockWorldPos + Vec3(0, 1, -OFFSET);
+            corners[2] = blockWorldPos + Vec3(1, 1, -OFFSET);
+            corners[3] = blockWorldPos + Vec3(1, 0, -OFFSET);
+            break;
+        }
+    }
+    
+    // 绘制4条边（使用稍粗的线）
+    for(int i = 0; i < 4; i++) {
+        Vec3 start = corners[i];
+        Vec3 end = corners[(i + 1) % 4];
+        
+        // 可以使用AddVertsForLine3D或者渲染粗线
+        AddVertsForAABB3D(lineVertices, start, end, LINE_THICKNESS, highlightColor);
+    }
+    
+    // 渲染
+    g_theRenderer->SetModelMatrix(Mat44());
+    g_theRenderer->SetBlendMode(BlendMode::ALPHA);
+    g_theRenderer->SetDepthStencilMode(DepthTest::LESSEQUAL, false); // 禁用深度写入
+    g_theRenderer->BindTexture(nullptr);
+    g_theRenderer->DrawVertexArray((int)lineVertices.size(), lineVertices.data());
+    g_theRenderer->SetDepthStencilMode(DepthTest::LESSEQUAL, true);
+}
+
 void Chunk::SetNeighbor(Direction dir, Chunk* neighbor)
 {
     switch (dir)
@@ -417,10 +499,10 @@ void Chunk::DigBlock(const IntVec3& localCoords)
     if (!CanDigBlock(block->m_typeIndex))
         return;
     
-    block->m_typeIndex = BLOCK_TYPE_AIR;
-    block->SetIsOpaque(false);
-    block->SetIsSolid(false);
-    block->SetIsVisible(false);
+    block->SetType(BLOCK_TYPE_AIR);
+    //block->SetIsOpaque(false);
+    //block->SetIsSolid(false);
+    //block->SetIsVisible(false);
     
     m_world->MarkLightingDirty(iter);
     
@@ -497,10 +579,10 @@ void Chunk::PlaceBlock(const IntVec3& localCoords, uint8_t blockType)
     
     const BlockDefinition& blockDef = BlockDefinition::GetBlockDef(blockType);
     
-    block->m_typeIndex = blockType;
-    block->SetIsOpaque(blockDef.m_isOpaque);
-    block->SetIsSolid(blockDef.m_isSolid);
-    block->SetIsVisible(blockDef.m_isVisible);
+    block->SetType(blockType);
+    //block->SetIsOpaque(blockDef.m_isOpaque);
+    //block->SetIsSolid(blockDef.m_isSolid);
+    //block->SetIsVisible(blockDef.m_isVisible);
     
     // 1. 标记该方块光照为脏
     m_world->MarkLightingDirty(iter);
@@ -736,7 +818,6 @@ bool Chunk::Load()
     // for (int i = 0; i < CHUNK_TOTAL_BLOCKS; ++i)
     // {
     //     m_blocks[i].m_typeIndex = m_serializer->m_blockData[i];
-    //
     //     BlockDefinition const& blockDef = BlockDefinition::GetBlockDef(m_blocks[i].m_typeIndex);
     //     m_blocks[i].SetIsOpaque(blockDef.m_isOpaque);
     //     m_blocks[i].SetIsSolid(blockDef.m_isSolid);

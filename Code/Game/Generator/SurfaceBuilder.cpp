@@ -215,18 +215,12 @@ void SurfaceBuilder::BuildSurface(
         if (currentDepth < config.m_topDepth)
         {
             // 表层
-            blocks[idx].m_typeIndex = config.m_topBlock;
+            blocks[idx].SetType(config.m_topBlock);
         }
         else if (currentDepth < config.m_topDepth + config.m_fillerDepth)
         {
             // 填充层
-            blocks[idx].m_typeIndex = config.m_fillerBlock;
-        }
-        else if (config.m_underDepth > 0 && 
-                 currentDepth < config.m_topDepth + config.m_fillerDepth + config.m_underDepth)
-        {
-            // 底层
-            blocks[idx].m_typeIndex = config.m_underBlock;
+            blocks[idx].SetType( config.m_underBlock);
         }
         else
         {
@@ -288,7 +282,7 @@ void SurfaceBuilder::ApplyTemperatureOverrides(Block* blocks, float temperature)
                             int idxUp = LocalCoordsToIndex(x, y, z + 1);
                             if (blocks[idxUp].m_typeIndex == BLOCK_TYPE_AIR)
                             {
-                                blocks[idx].m_typeIndex = BLOCK_TYPE_ICE;
+                                blocks[idx].SetType(BLOCK_TYPE_ICE);
                                 break;  // 只冻结最上层
                             }
                         }
@@ -327,19 +321,19 @@ void SurfaceBuilder::GenerateOres(Block* blocks, const IntVec2& chunkCoords)
                 
                 if (z <= 16 && oreNoise > 0.95f)
                 {
-                    blocks[idx].m_typeIndex = BLOCK_TYPE_DIAMOND;
+                    blocks[idx].SetType(BLOCK_TYPE_DIAMOND);
                 }
                 else if (z <= 32 && oreNoise > 0.9f)
                 {
-                    blocks[idx].m_typeIndex = BLOCK_TYPE_GOLD;
+                    blocks[idx].SetType(BLOCK_TYPE_GOLD);
                 }
                 else if (z <= 64 && oreNoise > 0.75f)
                 {
-                    blocks[idx].m_typeIndex = BLOCK_TYPE_IRON;
+                    blocks[idx].SetType(BLOCK_TYPE_IRON);
                 }
                 else if (oreNoise > 0.65f)
                 {
-                    blocks[idx].m_typeIndex = BLOCK_TYPE_COAL;
+                    blocks[idx].SetType(BLOCK_TYPE_COAL);
                 }
             }
         }

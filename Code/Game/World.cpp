@@ -38,67 +38,30 @@ World::~World()
 
 void World::Update(float deltaSeconds)
 {
-    // //UpdateVisibleChunks();
-    //
-    // UpdateAccelerateTime();
-    // UpdateTypeToPlace();
-    // UpdateDiggingAndPlacing(deltaSeconds);
-    // // Chunk* chunkToUpdate = GetChunkFromPlayerCameraPosition(m_owner->m_player->m_position);
-    // // if(chunkToUpdate)
-    // //     chunkToUpdate->Update(deltaSeconds);
-    //
-    // ProcessCompletedJobs();
-    //
-    // RebuildDirtyMeshes(2);
-    //
-    // // if ((int)m_activeChunks.size() < MAX_ACTIVE_CHUNKS)
-    // // {
-    // //     ActivateSingleNearestMissingChunkWithinRange();
-    // // }
+    //UpdateVisibleChunks();
+    
+    UpdateAccelerateTime();
+    UpdateTypeToPlace();
+    UpdateDiggingAndPlacing(deltaSeconds);
+    // Chunk* chunkToUpdate = GetChunkFromPlayerCameraPosition(m_owner->m_player->m_position);
+    // if(chunkToUpdate)
+    //     chunkToUpdate->Update(deltaSeconds);
+    
+    ProcessCompletedJobs();
+    
+    RebuildDirtyMeshes(2);
+    
     // if ((int)m_activeChunks.size() < MAX_ACTIVE_CHUNKS)
     // {
-    //     SubmitNewActivateJobs(); 
+    //     ActivateSingleNearestMissingChunkWithinRange();
     // }
-    // DeactivateSingleFarthestOutsideRangeIfAny();
-#define PERF_TIMER_START(name) auto start_##name = std::chrono::high_resolution_clock::now();
-#define PERF_TIMER_END(name) \
-auto end_##name = std::chrono::high_resolution_clock::now(); \
-auto duration_##name = std::chrono::duration_cast<std::chrono::microseconds>(end_##name - start_##name).count(); \
-if (duration_##name > 1000) DebuggerPrintf("[PERF] %s: %.2fms\n", #name, duration_##name / 1000.0f);
-
-    PERF_TIMER_START(UpdateAccelerateTime)
-    UpdateAccelerateTime();
-    PERF_TIMER_END(UpdateAccelerateTime)
-    
-    PERF_TIMER_START(UpdateTypeToPlace)
-    UpdateTypeToPlace();
-    PERF_TIMER_END(UpdateTypeToPlace)
-    
-    PERF_TIMER_START(UpdateDiggingAndPlacing)
-    UpdateDiggingAndPlacing(deltaSeconds);
-    PERF_TIMER_END(UpdateDiggingAndPlacing)
-
-    PERF_TIMER_START(ProcessCompletedJobs)
-    ProcessCompletedJobs();
-    PERF_TIMER_END(ProcessCompletedJobs)
-
-    PERF_TIMER_START(RebuildDirtyMeshes)
-    RebuildDirtyMeshes(2);
-    PERF_TIMER_END(RebuildDirtyMeshes)
-    
-    PERF_TIMER_START(SubmitNewActivateJobs)
     if ((int)m_activeChunks.size() < MAX_ACTIVE_CHUNKS)
     {
         SubmitNewActivateJobs(); 
     }
-    PERF_TIMER_END(SubmitNewActivateJobs)
-    
-    PERF_TIMER_START(DeactivateSingleFarthestOutsideRangeIfAny)
     DeactivateSingleFarthestOutsideRangeIfAny();
-    PERF_TIMER_END(DeactivateSingleFarthestOutsideRangeIfAny)
-
+    
     m_debugTimer += deltaSeconds;
-
 	if (m_debugTimer >= 2.0f)
 	{
 		m_debugTimer = 0.0f;
@@ -119,18 +82,6 @@ if (duration_##name > 1000) DebuggerPrintf("[PERF] %s: %.2fms\n", #name, duratio
     UpdateDayNightCycle(deltaSeconds);
     UpdateWorldConstants();
     ProcessDirtyLighting();
-
-    PERF_TIMER_START(UpdateDayNightCycle)
-    UpdateDayNightCycle(deltaSeconds);
-    PERF_TIMER_END(UpdateDayNightCycle)
-    
-    PERF_TIMER_START(UpdateWorldConstants)
-    UpdateWorldConstants();
-    PERF_TIMER_END(UpdateWorldConstants)
-    
-    PERF_TIMER_START(ProcessDirtyLighting)
-    ProcessDirtyLighting();
-    PERF_TIMER_END(ProcessDirtyLighting)
 }
 
 void World::Render() const
