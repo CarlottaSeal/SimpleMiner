@@ -95,6 +95,7 @@ protected:
     const int* GetFaceIndices(Direction direction);
     IntVec3 GetNeighborBlockCoords(const IntVec3& localCoords, Direction dir);
     void UpdateVBOIBO();
+    bool AreAllNeighborsActive() const;
 
 protected:
     ChunkSerializer* m_serializer;

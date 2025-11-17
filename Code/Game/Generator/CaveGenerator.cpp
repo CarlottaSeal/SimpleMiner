@@ -140,15 +140,15 @@ bool CaveGenerator::IsInCave(const Vec3& worldPos, int distanceToSurface, float 
 }
 void CaveGenerator::CarveCaves(Block* blocks, const IntVec2& chunkCoords, const ChunkGenData& chunkGenData)
 {
-    int caveCount = 0;
-    int airCaveCount = 0;
-    int waterCaveCount = 0;
-    int lavaCaveCount = 0;
-    
-    int cheeseCount = 0;
-    int spaghettiCount = 0;
-    int noodleCount = 0;
-    
+    // int caveCount = 0;
+    // int airCaveCount = 0;
+    // int waterCaveCount = 0;
+    // int lavaCaveCount = 0;
+    //
+    // int cheeseCount = 0;
+    // int spaghettiCount = 0;
+    // int noodleCount = 0;
+    //
     float seaLevel = (float)g_theGame->g_seaLevel;
     
     // Process each block in the chunk
@@ -187,49 +187,49 @@ void CaveGenerator::CarveCaves(Block* blocks, const IntVec2& chunkCoords, const 
                     continue;
                 }
                 
-                caveCount++;
+                //caveCount++;
                 
                 // Determine what to fill the cave with based on depth and conditions
                 uint8_t fillBlock = DetermineCaveFill(worldPos, terrainHeight, seaLevel, caveness);
                 
                 blocks[idx].SetType(fillBlock);
                 
-                // Statistics tracking
-                switch (fillBlock)
-                {
-                    case BLOCK_TYPE_AIR:
-                        airCaveCount++;
-                        break;
-                    case BLOCK_TYPE_WATER:
-                        waterCaveCount++;
-                        break;
-                    case BLOCK_TYPE_LAVA:
-                        lavaCaveCount++;
-                        break;
-                }
+                // // Statistics tracking
+                // switch (fillBlock)
+                // {
+                //     case BLOCK_TYPE_AIR:
+                //         airCaveCount++;
+                //         break;
+                //     case BLOCK_TYPE_WATER:
+                //         waterCaveCount++;
+                //         break;
+                //     case BLOCK_TYPE_LAVA:
+                //         lavaCaveCount++;
+                //         break;
+                // }
                 
                 // Track cave type statistics
-                if (caveness > 0.7f)
-                    cheeseCount++;
-                else if (caveness > 0.4f)
-                    spaghettiCount++;
-                else
-                    noodleCount++;
+                // if (caveness > 0.7f)
+                //     cheeseCount++;
+                // else if (caveness > 0.4f)
+                //     spaghettiCount++;
+                // else
+                //     noodleCount++;
             }
         }
     }
     
-    // Post-process for better water flow and lava pools
+    // Post-process for better water flow and lava pools TODO
     PostProcessLiquids(blocks, chunkCoords);
     
-    // Debug output
-    if (caveCount > 0)
-    {
-        DebuggerPrintf("Chunk(%d,%d): %d caves | Air:%d Water:%d Lava:%d | Cheese:%d Spaghetti:%d Noodle:%d\n",
-                       chunkCoords.x, chunkCoords.y,
-                       caveCount, airCaveCount, waterCaveCount, lavaCaveCount,
-                       cheeseCount, spaghettiCount, noodleCount);
-    }
+    // // Debug output
+    // if (caveCount > 0)
+    // {
+    //     DebuggerPrintf("Chunk(%d,%d): %d caves | Air:%d Water:%d Lava:%d | Cheese:%d Spaghetti:%d Noodle:%d\n",
+    //                    chunkCoords.x, chunkCoords.y,
+    //                    caveCount, airCaveCount, waterCaveCount, lavaCaveCount,
+    //                    cheeseCount, spaghettiCount, noodleCount);
+    // }
 }
 
 uint8_t CaveGenerator::DetermineCaveFill(const Vec3& worldPos, float terrainHeight, float seaLevel, float caveness)

@@ -264,9 +264,13 @@ void Game::GameStateUpdate()
 	if(m_currentWorld)
 		m_currentWorld->Update((float)s_theSystemClock->GetDeltaSeconds());
 
-	if (g_theApp->WasKeyJustPressed(KEYCODE_F2) || controller.WasButtonJustPressed(XboxButtonID::A))
+	if (g_theApp->WasKeyJustPressed(KEYCODE_F2))
 	{
 		m_currentWorld->ToggleDebugMode();
+	}
+	if (g_theApp->WasKeyJustPressed(KEYCODE_F3))
+	{
+		m_currentWorld->ToggleDebugPrintingMode();
 	}
 	DebugRenderSystemInputUpdate();
 
@@ -578,6 +582,29 @@ void Game::DebugRenderSystemInputUpdate()
 		typeMsg,
 		Vec2(m_screenCamera.GetOrthographicBottomLeft().x, m_screenCamera.GetOrthographicTopRight().y) -
 		Vec2(0.f, 15.f), 12.f, Vec2::ZERO, 0.f);
+
+	if (m_currentWorld->IsDebuggingPrinting())
+	{
+		// std::string worldSection = "World\n";
+		// worldSection += "\n";
+		// worldSection += Stringf("chunksPendingGeneration: %d\n", (int)m_currentWorld->m_processingChunks.size());
+		// worldSection += "\n";
+		// worldSection += Stringf("chunksGenerating: %d\n", (int)m_currentWorld->m_generatingChunksCount);
+		// worldSection += "\n";
+		// worldSection += Stringf("chunks: %d\n", (int)m_currentWorld->m_activeChunks.size());
+		// worldSection += "\n";
+		// std::string jobSection = "JobSystem\n";
+		// worldSection += "\n";
+		// jobSection += Stringf("Pending Jobs: %d\n", g_theJobSystem->GetPendingJobCount());
+		// worldSection += "\n";
+		// jobSection += Stringf("Executing Jobs: %d\n", g_theJobSystem->GetExecutingJobCount());
+		// worldSection += "\n";
+		// jobSection += Stringf("Completed Jobs: %d\n", g_theJobSystem->GetCompletedJobCount());
+		//
+		// worldSection += jobSection;
+		// DebugAddScreenText(
+		// worldSection, m_screenCamera.GetOrthographicBottomLeft()+Vec2(0.f, 8.f * 15.f), 12.f, Vec2::ZERO, 0.f);
+	}
 
 	// if (g_theApp->WasKeyJustPressed('0'))
 	// {

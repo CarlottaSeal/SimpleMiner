@@ -25,11 +25,6 @@ public:
     void PostProcessLiquids(Block* blocks, const IntVec2& chunkCoords);
 
 private:
-    float GetCheeseNoise(const Vec3& pos);
-    float GetSpaghettiNoise2D(const Vec3& pos);
-    float GetNoodleNoise(const Vec3& pos);
-    float GetCaveThreshold(float depth);
-    
     bool IsInCave(const Vec3& worldPos,
                   int distanceToSurface,
                   float terrainHeight,

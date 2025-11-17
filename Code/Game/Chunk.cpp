@@ -1045,6 +1045,14 @@ void Chunk::UpdateVBOIBO()
     g_theRenderer->CopyCPUToGPU(m_indices.data(), (unsigned int)(m_indices.size() * sizeof(unsigned int)),m_indexBuffer);
 }
 
+bool Chunk::AreAllNeighborsActive() const
+{
+    return (m_eastNeighbor && m_eastNeighbor->GetState() == ChunkState::ACTIVE) &&
+          (m_westNeighbor && m_westNeighbor->GetState() == ChunkState::ACTIVE) &&
+          (m_northNeighbor && m_northNeighbor->GetState() == ChunkState::ACTIVE) &&
+          (m_southNeighbor && m_southNeighbor->GetState() == ChunkState::ACTIVE);
+}
+
 void Chunk::ReportDirty()
 {
     m_world->m_hasDirtyChunk = true;

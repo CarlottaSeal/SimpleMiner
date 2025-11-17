@@ -323,7 +323,8 @@ void World::ProcessNextDirtyLightBlock()
     BlockIterator iter = m_dirtyLightBlocks.front();
     m_dirtyLightBlocks.pop_front();
     
-    if (!iter.IsValid())
+    if (!iter.IsValid() || !iter.GetChunk() || 
+         iter.GetChunk()->GetState() != ChunkState::ACTIVE)
         return;
     
     Block* block = iter.GetBlock();
@@ -1048,7 +1049,7 @@ void World::DeactivateChunk(IntVec2 chunkCoords)
         return;
         
     Chunk* chunk = it->second;
-    
+    UndirtyAllBlocksInChunk(chunk);
     DisconnectChunkNeighbors(chunk);
     m_activeChunks.erase(it);
     
@@ -1218,6 +1219,7 @@ void World::ProcessCompletedJobs()
     
     // 第一步：批量激活所有chunk，但先不连接邻居
     std::vector<Chunk*> newlyActivatedChunks;
+    m_generatingChunksCount = 0;
     for (Job* job : completedJobs)
     {
         Chunk* chunk = dynamic_cast<ChunkJob*>(job)->m_chunk;   
@@ -1240,35 +1242,17 @@ void World::ProcessCompletedJobs()
     }
     
     // 第二步：现在所有新chunk都在activeChunks中了，批量连接邻居
+    m_generatingChunksCount = (int)newlyActivatedChunks.size();
     for (Chunk* chunk : newlyActivatedChunks)
     {
         ConnectChunkNeighbors(chunk);
-        //
-        // int neighborCount = 0;
-        // if (chunk->m_eastNeighbor) neighborCount++;
-        // if (chunk->m_westNeighbor) neighborCount++;
-        // if (chunk->m_northNeighbor) neighborCount++;
-        // if (chunk->m_southNeighbor) neighborCount++;
-        //
-        // DebuggerPrintf("  Chunk (%d, %d) connected %d/4 neighbors\n", 
-        //                chunk->m_chunkCoords.x, chunk->m_chunkCoords.y, neighborCount);
-        
         chunk->m_isDirty = true;
         m_hasDirtyChunk = true;
     }
     for (Chunk* chunk : newlyActivatedChunks)
     {
-        chunk->InitializeLighting();  // ← 在这里调用！
-        chunk->m_isDirty = true;
-        m_hasDirtyChunk = true;
+        chunk->InitializeLighting();
     }
-    // std::vector<Job*> completedJobs = g_theJobSystem->RetrieveCompletedJobs();
-    //
-    // for (Job* job : completedJobs)
-    // {
-    //     job->OnComplete();
-    //     delete job; 
-    // }
 }
 
 void World::SubmitNewActivateJobs()
@@ -1507,9 +1491,19 @@ void World::ToggleDebugMode()
     m_isDebugging = !m_isDebugging;
 }
 
+void World::ToggleDebugPrintingMode()
+{
+    m_isDebugPrinting = !m_isDebugPrinting;
+}
+
 bool World::IsDebugging() const
 {
     return m_isDebugging;
+}
+
+bool World::IsDebuggingPrinting() const
+{
+    return m_isDebugPrinting;
 }
 
 void World::UpdateTypeToPlace()

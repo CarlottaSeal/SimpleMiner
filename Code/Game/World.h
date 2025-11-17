@@ -71,7 +71,9 @@ public:
     GameRaycastResult3D RaycastVsBlocks(const Vec3& start, const Vec3& direction, float maxDistance);
 
     void ToggleDebugMode();
+    void ToggleDebugPrintingMode();
     bool IsDebugging() const;
+    bool IsDebuggingPrinting() const;
     
 private:
     void UpdateTypeToPlace();
@@ -103,6 +105,7 @@ private:
 
 private:
     bool m_isDebugging = false;
+    bool m_isDebugPrinting = false;
 
 public:
     Game* m_owner;
@@ -137,6 +140,8 @@ protected:
     
     std::map<IntVec2, Chunk*> m_processingChunks; 
     std::mutex m_processingChunksMutex;
+
+    int m_generatingChunksCount = 0; //debugging
     
     std::vector<Chunk*> m_chunks;
 

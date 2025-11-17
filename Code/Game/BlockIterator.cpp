@@ -143,11 +143,11 @@ BlockIterator BlockIterator::GetNeighborCrossBoundary(Direction dir) const
     switch (dir)
     {
     case DIRECTION_EAST:  
-        if ((m_blockIndex & CHUNK_MASK_X) == CHUNK_MAX_X)  // ← 直接检查
+        if ((m_blockIndex & CHUNK_MASK_X) == CHUNK_MAX_X)  
         {
             Chunk* eastChunk = m_chunk->GetNeighbor(DIRECTION_EAST);
-            if (!eastChunk)
-                return BlockIterator();  
+            if (!eastChunk || eastChunk->GetState() != ChunkState::ACTIVE)
+                return BlockIterator();
             
             int newIndex = (m_blockIndex & ~CHUNK_MASK_X);
             return BlockIterator(eastChunk, newIndex);
