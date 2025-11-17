@@ -24,6 +24,7 @@ public:
     BlockIterator();
     BlockIterator(Chunk* chunk, int blockIndex);
     BlockIterator(Chunk* chunk, const IntVec3& localCoords);
+    BlockIterator(const BlockIterator& other);
     ~BlockIterator();
 
     bool MoveEast();   // +X
@@ -77,6 +78,7 @@ public:
     BlockIterator& operator++(); 
     bool operator==(const BlockIterator& other) const;
     bool operator!=(const BlockIterator& other) const;
+    BlockIterator& operator=(const BlockIterator& other);
 
 protected:
     bool IsIndexValid(int index) const;

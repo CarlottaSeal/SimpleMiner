@@ -99,6 +99,8 @@ public:
 	bool g_blockReplacementEnabled = true;
 	bool g_caveCarvingEnabled = true;
 	bool g_treeGenerationEnabled = true;
+
+	float g_caveGeneratingThreshold = 0.2f;
 	// Debug
 	int g_debugVisualizationMode = 0;
 	bool g_showChunkBounds = true; 

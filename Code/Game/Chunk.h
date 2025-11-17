@@ -14,14 +14,6 @@
 class World;
 class BlockIterator;
 
-struct HighlightInfo
-{
-    bool isValid = false;
-    IntVec3 blockCoords;
-    Direction face;
-};
-
-
 enum class ChunkState : int
 {
     UNINITIALIZED,           // 初始状态
@@ -62,7 +54,6 @@ public:
 
     void Update(float deltaSeconds);
     void Render() const;
-    void RenderBlockHighlight(const IntVec3& localCoords, Direction face) const;
 
     IntVec2 GetThisChunkCoords() const { return m_chunkCoords; }
     

@@ -17,12 +17,19 @@ class Chunk;
 
 struct GameRaycastResult3D : public RaycastResult3D
 {
-    BlockIterator m_hitBlock;      // 被击中的方块
-    Direction m_hitFace;           // 被击中的面
-    IntVec3 m_hitLocalCoords;      // 击中方块的局部坐标
-    IntVec3 m_hitGlobalCoords;      // 击中方块的局部坐标
+    BlockIterator m_hitBlock;      
+    Direction m_hitFace;           
+    IntVec3 m_hitLocalCoords;      
+    IntVec3 m_hitGlobalCoords;     
     
     GameRaycastResult3D() : m_hitFace(NUM_DIRECTIONS) {}
+};
+
+struct BlockHighlight
+{
+    bool m_isValid = false;
+    IntVec3 m_worldCoords;
+    Direction m_hitFace;
 };
 
 class World
@@ -35,6 +42,8 @@ public:
 
     void Update(float deltaSeconds);
     void Render() const;
+
+    
 
     Chunk* GetChunkFromPlayerCameraPosition(Vec3 cameraPos);
     Chunk* GetChunk(int chunkX, int chunkY);
@@ -90,6 +99,7 @@ private:
                                       uint8_t& outIndoorLight);
 
     void BindWorldConstansBuffer() const;
+    void RenderBlockHighlight() const;
 
 private:
     bool m_isDebugging = false;
@@ -98,6 +108,8 @@ public:
     Game* m_owner;
     WorldGenPipeline* m_worldGenPipeline;
     bool m_hasDirtyChunk = false;
+
+    BlockHighlight m_highlightedBlock;
 
     Shader* m_worldShader = nullptr;
     ConstantBuffer* m_worldConstantBuffer = nullptr;

@@ -22,6 +22,11 @@ BlockIterator::BlockIterator(Chunk* chunk, const IntVec3& localCoords)
     }
 }
 
+BlockIterator::BlockIterator(const BlockIterator& other)
+    : m_chunk(other.m_chunk), m_blockIndex(other.m_blockIndex) 
+{
+}
+
 BlockIterator::~BlockIterator()
 {
 }
@@ -336,6 +341,16 @@ bool BlockIterator::operator==(const BlockIterator& other) const
 bool BlockIterator::operator!=(const BlockIterator& other) const
 {
     return !(*this == other);
+}
+
+BlockIterator& BlockIterator::operator=(const BlockIterator& other)
+{
+    if (this != &other)
+    {
+        m_chunk = other.m_chunk;
+        m_blockIndex = other.m_blockIndex;
+    }
+    return *this;
 }
 
 bool BlockIterator::IsIndexValid(int index) const

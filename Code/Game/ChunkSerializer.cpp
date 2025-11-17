@@ -29,20 +29,26 @@ void ChunkSerializer::SaveToBinary(std::vector<uint8_t>& buffer) const
     if (!m_chunk || !m_chunk->m_blocks)
         return;
 
-    // 1. 写入 header
+    // 准备要压缩的数据（所有 Block 的原始字节）
+    size_t totalBytes = CHUNK_TOTAL_BLOCKS * sizeof(Block);
+    const uint8_t* blockBytes = reinterpret_cast<const uint8_t*>(m_chunk->m_blocks);
+
+    // 先做 RLE 压缩
+    std::vector<uint8_t> compressed = RLECompression::CompressBytes(blockBytes, totalBytes);
+    uint32_t compressedSize = static_cast<uint32_t>(compressed.size());
+
+    // 1. 写入 header（结构体格式不变）
     ChunkFileHeader header(CHUNK_BITS_X, CHUNK_BITS_Y, CHUNK_BITS_Z);
     size_t headerPos = buffer.size();
     buffer.resize(headerPos + sizeof(ChunkFileHeader));
     memcpy(buffer.data() + headerPos, &header, sizeof(ChunkFileHeader));
 
-    // 2. 准备要压缩的数据（所有 3 个 bytes per block）
-    size_t totalBytes = CHUNK_TOTAL_BLOCKS * sizeof(Block);  // 总字节数
-    const uint8_t* blockBytes = reinterpret_cast<const uint8_t*>(m_chunk->m_blocks);
-    
-    // 3. 使用 RLE 压缩所有字节
-    std::vector<uint8_t> compressed = RLECompression::CompressBytes(blockBytes, totalBytes);
-    
-    // 4. 写入压缩后的数据
+    // 2. 紧接着写入压缩数据长度 compressedSize（uint32_t）
+    size_t sizePos = buffer.size();
+    buffer.resize(sizePos + sizeof(uint32_t));
+    memcpy(buffer.data() + sizePos, &compressedSize, sizeof(uint32_t));
+
+    // 3. 最后写入压缩后的数据本体
     size_t compressedPos = buffer.size();
     buffer.resize(compressedPos + compressed.size());
     memcpy(buffer.data() + compressedPos, compressed.data(), compressed.size());
@@ -50,7 +56,6 @@ void ChunkSerializer::SaveToBinary(std::vector<uint8_t>& buffer) const
 
 bool ChunkSerializer::LoadFromBinary(const std::vector<uint8_t>& buffer, size_t& offset)
 {
-    // 1. 读取并验证 header
     if (offset + sizeof(ChunkFileHeader) > buffer.size())
     {
         ERROR_RECOVERABLE("Chunk file too small for header");
@@ -59,22 +64,39 @@ bool ChunkSerializer::LoadFromBinary(const std::vector<uint8_t>& buffer, size_t&
 
     ChunkFileHeader header;
     memcpy(&header, buffer.data() + offset, sizeof(ChunkFileHeader));
-    
+
     if (!header.Validate(CHUNK_BITS_X, CHUNK_BITS_Y, CHUNK_BITS_Z))
     {
         ERROR_RECOVERABLE("Invalid chunk header");
         return false;
     }
-    
+
     offset += sizeof(ChunkFileHeader);
 
-    // 2. 计算剩余数据大小（压缩数据）
-    size_t compressedSize = buffer.size() - offset;
-    
-    // 3. 验证压缩数据大小（RLE 格式必须是偶数，因为是 [value][count] 对）
-    if (compressedSize == 0 || compressedSize % 2 != 0)
+    // 2. 读取紧跟在 header 后面的 compressedSize（uint32_t）
+    if (offset + sizeof(uint32_t) > buffer.size())
+    {
+        ERROR_RECOVERABLE("Chunk file too small for compressed size");
+        return false;
+    }
+
+    uint32_t compressedSize = 0;
+    memcpy(&compressedSize, buffer.data() + offset, sizeof(uint32_t));
+    offset += sizeof(uint32_t);
+
+    // 3. 验证压缩数据长度
+    //    - 不能为 0
+    //    - 必须是偶数（RLE: [value][count] 成对存储）
+    //    - 不能超过 buffer 剩余空间
+    if (compressedSize == 0 || (compressedSize % 2) != 0)
     {
         ERROR_RECOVERABLE("Invalid RLE data size");
+        return false;
+    }
+
+    if (offset + compressedSize > buffer.size())
+    {
+        ERROR_RECOVERABLE("Compressed data exceeds buffer size");
         return false;
     }
 
@@ -83,25 +105,26 @@ bool ChunkSerializer::LoadFromBinary(const std::vector<uint8_t>& buffer, size_t&
     {
         m_blockData = new uint8_t[CHUNK_TOTAL_BLOCKS * sizeof(Block)];
     }
-    
+
     // 5. 解压缩数据
     size_t totalBytes = CHUNK_TOTAL_BLOCKS * sizeof(Block);
     bool success = RLECompression::DecompressBytes(
-        buffer.data() + offset, 
-        compressedSize, 
-        m_blockData, 
-        totalBytes  // 期望解压后的字节数
+        buffer.data() + offset,           // 压缩数据起始地址
+        static_cast<size_t>(compressedSize), // 压缩数据字节数
+        m_blockData,                      // 输出缓冲区
+        totalBytes                        // 期望解压后的字节数
     );
-    
+
     if (!success)
     {
         ERROR_RECOVERABLE("RLE decompression failed");
         return false;
     }
-    
+
     // 6. 复制解压后的数据到 chunk->m_blocks
     memcpy(m_chunk->m_blocks, m_blockData, totalBytes);
-    
+
+    // 7. 前进 offset，跳过刚刚消费掉的压缩数据
     offset += compressedSize;
     return true;
 }

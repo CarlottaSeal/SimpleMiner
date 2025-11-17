@@ -11,7 +11,7 @@
   <BlockDefinition name="Gold" isOpaque="true" isSolid="true" isVisible="true" sideSpriteCoords="0, 1" topSpriteCoords="0, 1" bottomSpriteCoords="0, 1"/>
   <BlockDefinition name="Diamond" isOpaque="true" isSolid="true" isVisible="true" sideSpriteCoords="1, 1" topSpriteCoords="1, 1" bottomSpriteCoords="1, 1"/>
   <BlockDefinition name="Obsidian" isOpaque="true" isSolid="true" isVisible="true" sideSpriteCoords="2, 1" topSpriteCoords="2, 1" bottomSpriteCoords="2, 1"/>
-  <BlockDefinition name="Lava" isOpaque="true" isSolid="true" isVisible="true" sideSpriteCoords="3, 1" topSpriteCoords="3, 1" bottomSpriteCoords="3, 1"/>
+  <BlockDefinition name="Lava" isOpaque="true" isSolid="true" isVisible="true" indoorLighting="10" sideSpriteCoords="3, 1" topSpriteCoords="3, 1" bottomSpriteCoords="3, 1"/>
   <BlockDefinition name="Glowstone" isOpaque="true" isSolid="true" isVisible="true" indoorLighting="15" sideSpriteCoords="4, 1" topSpriteCoords="4, 1" bottomSpriteCoords="4, 1"/>
   <BlockDefinition name="Cobblestone" isOpaque="true" isSolid="true" isVisible="true" sideSpriteCoords="5, 1" topSpriteCoords="5, 1" bottomSpriteCoords="5, 1"/>
   <BlockDefinition name="ChiseledBrick" isOpaque="true" isSolid="true" isVisible="true" sideSpriteCoords="6, 1" topSpriteCoords="6, 1" bottomSpriteCoords="6, 1"/>

@@ -9,6 +9,7 @@
 #include "ChunkJob.h"
 #include "ChunkUtils.h"
 #include "Player.hpp"
+#include "Engine/Core/VertexUtils.hpp"
 #include "Engine/Math/IntVec2.hpp"
 #include "Engine/Renderer/ConstantBuffer.hpp"
 #include "ThirdParty/Noise/SmoothNoise.hpp"
@@ -49,8 +50,6 @@ void World::Update(float deltaSeconds)
     
     ProcessCompletedJobs();
     
-    RebuildDirtyMeshes(2);
-    
     // if ((int)m_activeChunks.size() < MAX_ACTIVE_CHUNKS)
     // {
     //     ActivateSingleNearestMissingChunkWithinRange();
@@ -82,29 +81,178 @@ void World::Update(float deltaSeconds)
     UpdateDayNightCycle(deltaSeconds);
     UpdateWorldConstants();
     ProcessDirtyLighting();
+    
+    RebuildDirtyMeshes(2);
 }
 
 void World::Render() const
 {
-    auto start = std::chrono::high_resolution_clock::now();
-    
     BindWorldConstansBuffer();
     for (auto& chunkPair : m_activeChunks)
     {
         chunkPair.second->Render();
+    }
+    if (m_highlightedBlock.m_isValid)
+    {
+        RenderBlockHighlight();
     }
 	// for (Chunk* chunk : m_visibleChunks)
 	// {
 	// 	chunk->Render();
 	//     DebuggerPrintf("Visible Chunks: %d\n", (int)m_visibleChunks.size());
 	// }
+}
 
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-    if (duration > 5000)  // 超过5ms
+void World::RenderBlockHighlight() const
+{
+     if (!m_highlightedBlock.m_isValid)
+        return;
+    
+    Vec3 blockWorldPos = Vec3(
+        (float)m_highlightedBlock.m_worldCoords.x,
+        (float)m_highlightedBlock.m_worldCoords.y,
+        (float)m_highlightedBlock.m_worldCoords.z
+    );
+
+    constexpr float EXPAND = 0.002f;
+    constexpr float BORDER_WIDTH = 0.05f;
+    
+    std::vector<Vertex_PCU> faceVertices;
+    Rgba8 borderColor = Rgba8(0, 0, 0, 150);
+    Rgba8 centerColor = Rgba8(255, 255, 255, 70);
+    AABB2 UVs(Vec2(0, 0), Vec2(1, 1));
+    
+    Direction face = m_highlightedBlock.m_hitFace;
+    
+    switch(face)
     {
-        DebuggerPrintf("[RENDER] World::Render took %.2fms\n", duration / 1000.0f);
+    case Direction::DIRECTION_NORTH:
+        { 
+            float y = blockWorldPos.y + 1.0f + EXPAND;
+           
+            AddVertsForQuad3D(faceVertices, 
+                Vec3(blockWorldPos.x, y, blockWorldPos.z),
+                Vec3(blockWorldPos.x, y, blockWorldPos.z + 1.0f),
+                Vec3(blockWorldPos.x + 1.0f, y, blockWorldPos.z + 1.0f),
+                Vec3(blockWorldPos.x + 1.0f, y, blockWorldPos.z),
+                borderColor, UVs);
+          
+            float inset = BORDER_WIDTH;
+            AddVertsForQuad3D(faceVertices,
+                Vec3(blockWorldPos.x + inset, y, blockWorldPos.z + inset),
+                Vec3(blockWorldPos.x + inset, y, blockWorldPos.z + 1.0f - inset),
+                Vec3(blockWorldPos.x + 1.0f - inset, y, blockWorldPos.z + 1.0f - inset),
+                Vec3(blockWorldPos.x + 1.0f - inset, y, blockWorldPos.z + inset),
+                centerColor, UVs);
+            break;
     }
+        
+    case Direction::DIRECTION_SOUTH:{ // -Y
+            float y = blockWorldPos.y - EXPAND;
+            AddVertsForQuad3D(faceVertices,
+                Vec3(blockWorldPos.x, y, blockWorldPos.z),
+                Vec3(blockWorldPos.x + 1.0f, y, blockWorldPos.z),
+                Vec3(blockWorldPos.x + 1.0f, y, blockWorldPos.z + 1.0f),
+                Vec3(blockWorldPos.x, y, blockWorldPos.z + 1.0f),
+                borderColor, UVs);
+            
+            float inset = BORDER_WIDTH;
+            AddVertsForQuad3D(faceVertices,
+                Vec3(blockWorldPos.x + inset, y, blockWorldPos.z + inset),
+                Vec3(blockWorldPos.x + 1.0f - inset, y, blockWorldPos.z + inset),
+                Vec3(blockWorldPos.x + 1.0f - inset, y, blockWorldPos.z + 1.0f - inset),
+                Vec3(blockWorldPos.x + inset, y, blockWorldPos.z + 1.0f - inset),
+                centerColor, UVs);
+            break;
+    }
+        
+        case Direction::DIRECTION_EAST: { // +X
+            float x = blockWorldPos.x + 1.0f + EXPAND;
+          
+            AddVertsForQuad3D(faceVertices,
+                Vec3(x, blockWorldPos.y, blockWorldPos.z),
+                Vec3(x, blockWorldPos.y + 1.0f, blockWorldPos.z),
+                Vec3(x, blockWorldPos.y + 1.0f, blockWorldPos.z + 1.0f),
+                Vec3(x, blockWorldPos.y, blockWorldPos.z + 1.0f),
+                borderColor, UVs);
+            
+            float inset = BORDER_WIDTH;
+            AddVertsForQuad3D(faceVertices,
+                Vec3(x, blockWorldPos.y + inset, blockWorldPos.z + inset),
+                Vec3(x, blockWorldPos.y + 1.0f - inset, blockWorldPos.z + inset),
+                Vec3(x, blockWorldPos.y + 1.0f - inset, blockWorldPos.z + 1.0f - inset),
+                Vec3(x, blockWorldPos.y + inset, blockWorldPos.z + 1.0f - inset),
+                centerColor, UVs);
+            break;
+        }
+        
+        case Direction::DIRECTION_WEST: { // -X
+            float x = blockWorldPos.x - EXPAND;
+     
+            AddVertsForQuad3D(faceVertices,
+                Vec3(x, blockWorldPos.y + 1.0f, blockWorldPos.z),
+                Vec3(x, blockWorldPos.y, blockWorldPos.z),
+                Vec3(x, blockWorldPos.y, blockWorldPos.z + 1.0f),
+                Vec3(x, blockWorldPos.y + 1.0f, blockWorldPos.z + 1.0f),
+                borderColor, UVs);
+
+            float inset = BORDER_WIDTH;
+            AddVertsForQuad3D(faceVertices,
+                Vec3(x, blockWorldPos.y + 1.0f - inset, blockWorldPos.z + inset),
+                Vec3(x, blockWorldPos.y + inset, blockWorldPos.z + inset),
+                Vec3(x, blockWorldPos.y + inset, blockWorldPos.z + 1.0f - inset),
+                Vec3(x, blockWorldPos.y + 1.0f - inset, blockWorldPos.z + 1.0f - inset),
+                centerColor, UVs);
+            break;
+        }
+        
+    case Direction::DIRECTION_UP: { 
+            float z = blockWorldPos.z + 1.0f + EXPAND;
+
+            AddVertsForQuad3D(faceVertices,
+                Vec3(blockWorldPos.x, blockWorldPos.y, z),
+                Vec3(blockWorldPos.x + 1.0f, blockWorldPos.y, z),
+                Vec3(blockWorldPos.x + 1.0f, blockWorldPos.y + 1.0f, z),
+                Vec3(blockWorldPos.x, blockWorldPos.y + 1.0f, z),
+                borderColor, UVs);
+ 
+            float inset = BORDER_WIDTH;
+            AddVertsForQuad3D(faceVertices,
+                Vec3(blockWorldPos.x + inset, blockWorldPos.y + inset, z),
+                Vec3(blockWorldPos.x + 1.0f - inset, blockWorldPos.y + inset, z),
+                Vec3(blockWorldPos.x + 1.0f - inset, blockWorldPos.y + 1.0f - inset, z),
+                Vec3(blockWorldPos.x + inset, blockWorldPos.y + 1.0f - inset, z),
+                centerColor, UVs);
+            break;
+        }
+        
+        case Direction::DIRECTION_DOWN: { 
+            float z = blockWorldPos.z - EXPAND;
+        
+            AddVertsForQuad3D(faceVertices,
+                Vec3(blockWorldPos.x, blockWorldPos.y + 1.0f, z),
+                Vec3(blockWorldPos.x + 1.0f, blockWorldPos.y + 1.0f, z),
+                Vec3(blockWorldPos.x + 1.0f, blockWorldPos.y, z),
+                Vec3(blockWorldPos.x, blockWorldPos.y, z),
+                borderColor, UVs);
+          
+            float inset = BORDER_WIDTH;
+            AddVertsForQuad3D(faceVertices,
+                Vec3(blockWorldPos.x + inset, blockWorldPos.y + 1.0f - inset, z),
+                Vec3(blockWorldPos.x + 1.0f - inset, blockWorldPos.y + 1.0f - inset, z),
+                Vec3(blockWorldPos.x + 1.0f - inset, blockWorldPos.y + inset, z),
+                Vec3(blockWorldPos.x + inset, blockWorldPos.y + inset, z),
+                centerColor, UVs);
+            break;
+        }
+    }
+    
+    g_theRenderer->SetModelConstants(Mat44());
+    g_theRenderer->SetBlendMode(BlendMode::ALPHA);
+    g_theRenderer->SetDepthMode(DepthMode::DISABLED); 
+    g_theRenderer->BindTexture(nullptr);
+    g_theRenderer->BindShader(nullptr);
+    g_theRenderer->DrawVertexArray((int)faceVertices.size(), faceVertices.data());
 }
 
 Chunk* World::GetChunkFromPlayerCameraPosition(Vec3 cameraPos)
@@ -171,8 +319,7 @@ void World::ProcessNextDirtyLightBlock()
 {
     if (m_dirtyLightBlocks.empty())
         return;
-    
-    // 弹出队列前端
+
     BlockIterator iter = m_dirtyLightBlocks.front();
     m_dirtyLightBlocks.pop_front();
     
@@ -189,6 +336,8 @@ void World::ProcessNextDirtyLightBlock()
     // 计算理论正确的光照值
     uint8_t correctOutdoorLight = 0;
     uint8_t correctIndoorLight = 0;
+    if (!iter.IsValid())
+        return;
     ComputeCorrectLightInfluence(iter, correctOutdoorLight, correctIndoorLight);
     
     // 获取当前光照值
@@ -247,6 +396,9 @@ void World::MarkLightingDirty(const BlockIterator& iter)
 
 void World::MarkLightingDirtyIfNotOpaque(const BlockIterator& iter)
 {
+    if (!iter.GetChunk())
+        return;
+
     if (!iter.IsValid())
         return;
     
@@ -1040,11 +1192,11 @@ void World::ActivateProcessedChunk(Chunk* chunk)
 
 		ConnectChunkNeighbors(chunk);
 
-        int neighborCount = 0;
+        /*int neighborCount = 0;
         if (chunk->m_eastNeighbor) neighborCount++;
         if (chunk->m_westNeighbor) neighborCount++;
         if (chunk->m_northNeighbor) neighborCount++;
-        if (chunk->m_southNeighbor) neighborCount++;
+        if (chunk->m_southNeighbor) neighborCount++;*/
     
        // DebuggerPrintf("  Neighbors connected: %d/4\n", neighborCount);
 
@@ -1101,6 +1253,12 @@ void World::ProcessCompletedJobs()
         // DebuggerPrintf("  Chunk (%d, %d) connected %d/4 neighbors\n", 
         //                chunk->m_chunkCoords.x, chunk->m_chunkCoords.y, neighborCount);
         
+        chunk->m_isDirty = true;
+        m_hasDirtyChunk = true;
+    }
+    for (Chunk* chunk : newlyActivatedChunks)
+    {
+        chunk->InitializeLighting();  // ← 在这里调用！
         chunk->m_isDirty = true;
         m_hasDirtyChunk = true;
     }
@@ -1260,6 +1418,7 @@ void World::ComputeCorrectLightInfluence(const BlockIterator& iter, uint8_t& out
     }
     
     BlockDefinition const& def = BlockDefinition::GetBlockDef(block->m_typeIndex);
+
     if (def.m_indoorLightInfluence > 0)
     {
         outIndoorLight = def.m_indoorLightInfluence;
@@ -1377,6 +1536,7 @@ void World::UpdateDiggingAndPlacing(float deltaSeconds)
     }
     if (m_isRaycastLocked)
     {
+        m_highlightedBlock.m_isValid = false;
         Chunk* chunkToUpdate = GetChunkFromPlayerCameraPosition(m_owner->m_player->m_position);
         if(chunkToUpdate)
             chunkToUpdate->Update(deltaSeconds); //只有Dig TODO：改写成更好的方式
@@ -1391,10 +1551,18 @@ void World::UpdateDiggingAndPlacing(float deltaSeconds)
     float maxRaycastDistance = 10.0f; 
     
     m_currentRaycast = RaycastVsBlocks(cameraPos, cameraForward, maxRaycastDistance);
+
+    if (m_currentRaycast.m_didImpact)
+    {
+        m_highlightedBlock.m_isValid = true;
+        m_highlightedBlock.m_worldCoords = m_currentRaycast.m_hitGlobalCoords;
+        m_highlightedBlock.m_hitFace = m_currentRaycast.m_hitFace;
+    }
     
     if (g_theInput->WasKeyJustPressed(KEYCODE_LEFT_MOUSE))
     {
-        if (m_currentRaycast.m_didImpact)
+        //if (m_currentRaycast.m_didImpact)
+        if ( m_highlightedBlock.m_isValid)
         {
             //DebuggerPrintf("Impacted! Digging");
             Chunk* chunk = m_currentRaycast.m_hitBlock.GetChunk();
@@ -1407,7 +1575,8 @@ void World::UpdateDiggingAndPlacing(float deltaSeconds)
     
     if (g_theInput->WasKeyJustPressed(KEYCODE_RIGHT_MOUSE))
     {
-        if (m_currentRaycast.m_didImpact)
+        //if (m_currentRaycast.m_didImpact)
+        if (m_highlightedBlock.m_isValid)
         {
             //DebuggerPrintf("Impacted! Placing");
             BlockIterator placeIter = m_currentRaycast.m_hitBlock.GetNeighborCrossBoundary(m_currentRaycast.m_hitFace);
