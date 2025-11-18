@@ -1,34 +1,38 @@
 #pragma once
-#include "Engine/Math/Vec3.hpp"
+#include "Physics/Entity.h"
+#include "Physics/GameCamera.h"
 #include "Engine/Renderer/Camera.hpp"
 
 class Game;
-class Camera;
 
-class Player
+class Player : public Entity
 {
 public:
-	Player(Game* owner);
-	~Player();
+    Player(Game* owner, Vec3 const& startPos);
+    virtual ~Player();
 
-	void Update(float deltaSeconds);
-	void Render() const;
-
-	Vec3 GetForwardVectorDueToOrientation() const;
-	Vec3 GetLeftVectorDueToOrientation() const;
-	Mat44 GetModelToWorldTransform() const;
+    virtual void Update(float deltaSeconds) override;
+    virtual void Render() const override;
+	
+    void UpdateInput(float deltaSeconds);
+    void UpdateFromKeyboard(float deltaSeconds);
+    void UpdateFromController(float deltaSeconds);
+	
+    void CyclePhysicsMode();
+    void CycleCameraMode();
+	
+    // Camera
+    GameCamera* GetGameCamera() { return m_gameCamera; }
+    Camera& GetWorldCamera() { return m_worldCamera; }
 
 public:
-	Vec3 m_originV;
-	float m_originYaw;
-	float m_originPitch;
-	float m_originRoll;
+    Camera m_worldCamera;
+    GameCamera* m_gameCamera = nullptr;
 
-	Camera m_worldCamera;
-
-	Game* m_game = nullptr;
-	Vec3 m_position;
-	EulerAngles m_orientation;
-	EulerAngles m_angularVelocity;
-	Vec3 m_velocity;
+	std::string m_playerModeString;
+	
+    // Input state
+    bool m_isRunning = false;
+    float m_normalSpeed = 6.0f;
+	float m_maxSpeed = 20.f;
 };

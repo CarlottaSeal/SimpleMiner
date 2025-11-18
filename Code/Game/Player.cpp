@@ -1,137 +1,250 @@
 ﻿#include "Player.hpp"
-#include "Game/Game.hpp"
-#include "Game/App.hpp"
+#include "Game.hpp"
+#include "App.hpp"
+#include "Physics/GameCamera.h"
 #include "Engine/Input/InputSystem.hpp"
-#include "Engine/Math/MathUtils.hpp"
 #include "Engine/Window/Window.hpp"
-#include "Engine/Renderer/Camera.hpp"
 
 extern InputSystem* g_theInput;
 extern Window* g_theWindow;
+extern App* g_theApp;
 
-Player::Player(Game* owner)
-	: m_game(owner)
+Player::Player(Game* owner, Vec3 const& startPos)
+	: Entity(owner, startPos)
 {
-	m_position = Vec3(-50.f, -50.f, 150.f);
-	m_orientation = EulerAngles(45.f, 45.f, 0.f);
-	m_angularVelocity = EulerAngles(90.f, 90.f, 90.f);
-	m_originYaw = m_angularVelocity.m_yawDegrees;
-	m_originPitch = m_angularVelocity.m_pitchDegrees;
-	m_originRoll = m_angularVelocity.m_rollDegrees;
-
-	//jfasodfjiasdf
-	m_velocity = Vec3(4.f, 4.f, 4.f);
-	m_originV = m_velocity;
+	m_runSpeed = 12.f;
+	
+	// Player dimensions (1.80m tall, 0.60m wide)
+	m_physicsHeight = 1.80f;
+	m_physicsRadius = 0.30f;  // Half width = 0.30m
+	m_eyeHeight = 1.65f;
+	
+	// Update physics body
+	m_physicsBody.m_mins = Vec3(-m_physicsRadius, -m_physicsRadius, 0.0f);
+	m_physicsBody.m_maxs = Vec3(m_physicsRadius, m_physicsRadius, m_physicsHeight);
+	
+	// Initialize orientation
+	m_orientation = EulerAngles(45.0f, 0.0f, 0.0f);
+	
+	// Create game camera
+	m_gameCamera = new GameCamera();
+	m_gameCamera->SetPosition(GetEyePosition());
+	m_gameCamera->SetOrientation(m_orientation);
+	
+	// Initialize world camera
+	m_worldCamera.SetPosition(GetEyePosition());
+	m_worldCamera.SetOrientation(m_orientation);
 }
 
 Player::~Player()
 {
+	if (m_gameCamera)
+	{
+		delete m_gameCamera;
+		m_gameCamera = nullptr;
+	}
 }
 
 void Player::Update(float deltaSeconds)
 {
-	m_worldCamera.SetPosition(m_position);
-	m_worldCamera.SetOrientation(m_orientation);
-
-	XboxController const& controller = g_theInput->GetController(0);
-	Vec3 fwd = GetForwardVectorDueToOrientation();
-	Vec3 left = GetLeftVectorDueToOrientation();
-
-	IntVec2 windowSize = g_theWindow->GetClientDimensions();
-	int mouseDeltaX = g_theInput->m_cursorState.m_cursorClientDelta.x;
-	int mouseDeltaY = g_theInput->m_cursorState.m_cursorClientDelta.y;
-
-	m_orientation.m_yawDegrees -= (float)mouseDeltaX * 0.075f;//* deltaSeconds;
-	m_orientation.m_pitchDegrees += (float)mouseDeltaY * 0.075f;//deltaSeconds;
-	m_orientation.m_yawDegrees += controller.GetRightStickX() * m_angularVelocity.m_yawDegrees * 0.0025f;//deltaSeconds;
-	m_orientation.m_pitchDegrees += controller.GetRightStickY() * m_angularVelocity.m_pitchDegrees * 0.0025f;//deltaSeconds;
-
-	if (g_theApp->IsKeyDown('Q') || controller.IsButtonDown(XboxButtonID::LB))
-	{
-		m_orientation.m_rollDegrees -= m_angularVelocity.m_rollDegrees * deltaSeconds;
-	}
-
-	if (g_theApp->IsKeyDown('E') || controller.IsButtonDown(XboxButtonID::RB))
-	{
-		m_orientation.m_rollDegrees += m_angularVelocity.m_rollDegrees * deltaSeconds;
-	}
-
-	if (g_theApp->IsKeyDown('A'))
-	{
-		m_position += left* m_velocity.y * deltaSeconds;
-	}
-	if (g_theApp->IsKeyDown('D'))
-	{
-		m_position -= left * m_velocity.y * deltaSeconds;
-	}
-	m_position += left * m_velocity.y * controller.GetLeftStickX()*deltaSeconds;
-
-	if (g_theApp->IsKeyDown('W'))
-	{
-		m_position += fwd * m_velocity.x * deltaSeconds;
-	}
-	if (g_theApp->IsKeyDown('S'))
-	{
-		m_position -= fwd * m_velocity.x * deltaSeconds;
-	}
-	m_position += fwd * m_velocity.x * controller.GetLeftStickY()* deltaSeconds;
+	// Update input first
+	UpdateInput(deltaSeconds);
 	
-	// if (g_theApp->IsKeyDown('Z'))// || controller.IsButtonDown(XboxButtonID::LS))
-	// {
-	// 	m_position.z += m_velocity.z * deltaSeconds;
-	// }
-	// m_position.z += m_velocity.z * controller.GetLeftTrigger() * deltaSeconds;
-	//
-	// if (g_theApp->IsKeyDown('C'))//|| controller.IsButtonDown(XboxButtonID::RS))
-	// {
-	// 	m_position.z -= m_velocity.z * deltaSeconds;
-	// }
-	//m_position.z -= m_velocity.z * controller.GetRightTrigger() * deltaSeconds;
-
-	if (g_theApp->IsKeyDown(KEYCODE_SHIFT) || controller.IsButtonDown(XboxButtonID::LS) || controller.IsButtonDown(XboxButtonID::RS))
+	// Then update physics (from Entity)
+	Entity::Update(deltaSeconds);
+	
+	// Update game camera
+	if (m_gameCamera)
 	{
-		m_velocity = m_originV * 20.f;
-		m_angularVelocity.m_yawDegrees = m_originYaw * 20.f;
-		m_angularVelocity.m_pitchDegrees = m_originPitch * 20.f;
-		m_angularVelocity.m_rollDegrees = m_originRoll * 20.f;
+		m_gameCamera->Update(deltaSeconds, this, m_game->m_currentWorld);
+		
+		// Sync world camera with game camera
+		m_worldCamera.SetPosition(m_gameCamera->GetPosition());
+		m_worldCamera.SetOrientation(m_gameCamera->GetOrientation());
 	}
-	if (!g_theApp->IsKeyDown(KEYCODE_SHIFT) && !controller.IsButtonDown(XboxButtonID::LS) && !controller.IsButtonDown(XboxButtonID::RS))
-	{
-		m_velocity = m_originV;
-		m_angularVelocity.m_yawDegrees   = m_originYaw;
-		m_angularVelocity.m_pitchDegrees = m_originPitch;
-		m_angularVelocity.m_rollDegrees  = m_originRoll;
-	}
-	m_orientation.m_yawDegrees = fmodf(m_orientation.m_yawDegrees, 360.0f);
-	m_orientation.m_pitchDegrees = GetClamped(m_orientation.m_pitchDegrees, -85.f, 85.f);
-	m_orientation.m_rollDegrees = GetClamped(m_orientation.m_rollDegrees, -45.f, 45.f);
 }
 
 void Player::Render() const
 {
+	// Only render entity bounds if not in first person
+	if (m_gameCamera && m_gameCamera->GetCameraMode() != GameCameraMode::FIRST_PERSON)
+	{
+		Entity::Render();
+	}
 }
 
-Vec3 Player::GetForwardVectorDueToOrientation() const
+void Player::UpdateInput(float deltaSeconds)
 {
-	Vec3 fwd, left, up;
-	m_orientation.GetAsVectors_IFwd_JLeft_KUp(fwd, left, up);
-	return fwd;
+	// Check for mode cycling
+	if (g_theInput->WasKeyJustPressed('V'))
+	{
+		CyclePhysicsMode();
+	}
+	
+	if (g_theInput->WasKeyJustPressed('C'))
+	{
+		CycleCameraMode();
+	}
+
+	XboxController const& controller = g_theInput->GetController(0);
+
+	if (m_gameCamera)
+	{
+		GameCameraMode cameraMode = m_gameCamera->GetCameraMode();
+		
+		// Only allow player orientation control in these modes
+		if (cameraMode == GameCameraMode::FIRST_PERSON ||
+			cameraMode == GameCameraMode::OVER_SHOULDER ||
+			cameraMode == GameCameraMode::FIXED_ANGLE_TRACKING ||
+			cameraMode == GameCameraMode::INDEPENDENT)
+		{
+			// Mouse look
+			Vec2 mouseDelta = g_theInput->GetCursorClientDelta();
+			m_orientation.m_yawDegrees -= mouseDelta.x * 0.075f;
+			m_orientation.m_pitchDegrees += mouseDelta.y * 0.075f;
+			
+			// Controller look
+			m_orientation.m_yawDegrees -= controller.GetRightStick().GetPosition().x * 90.0f * deltaSeconds;
+			m_orientation.m_pitchDegrees += controller.GetRightStick().GetPosition().y * 90.0f * deltaSeconds;
+			
+			// Clamp pitch
+			m_orientation.m_pitchDegrees = GetClamped(m_orientation.m_pitchDegrees, -85.0f, 85.0f);
+			m_orientation.m_yawDegrees = fmodf(m_orientation.m_yawDegrees, 360.0f);
+		}
+	}
+	
+	// Movement input
+	UpdateFromKeyboard(deltaSeconds);
+	UpdateFromController(deltaSeconds);
+	
+	// Jump
+	if (g_theInput->IsKeyDown(KEYCODE_SPACE) || controller.IsButtonDown(XboxButtonID::A))
+	{
+		Jump();
+	}
 }
 
-Vec3 Player::GetLeftVectorDueToOrientation() const
+void Player::UpdateFromKeyboard(float deltaSeconds)
 {
-	Vec3 fwd, left, up;
-	m_orientation.GetAsVectors_IFwd_JLeft_KUp(fwd, left, up);
-	return left;
+	// Check for run
+	m_isRunning = g_theInput->IsKeyDown(KEYCODE_SHIFT);
+	
+	// Update speed based on running
+	if (m_isRunning)
+	{
+		m_maxSpeed = m_runSpeed;
+		m_flySpeed = m_runSpeed * 2.0f;
+	}
+	else
+	{
+		m_maxSpeed = m_normalSpeed;
+		m_flySpeed = m_normalSpeed * 2.0f;
+	}
+	
+	// Build movement direction
+	Vec3 moveDir = Vec3();
+	
+	Vec3 forward = GetForwardVector();
+	Vec3 left = GetLeftVector();
+	
+	// For walking mode, flatten forward and left to XY plane
+	if (m_physicsMode == PhysicsMode::WALKING)
+	{
+		forward.z = 0.0f;
+		if (forward.GetLengthSquared() > 0.0f)
+			forward = forward.GetNormalized();
+		
+		left.z = 0.0f;
+		if (left.GetLengthSquared() > 0.0f)
+			left = left.GetNormalized();
+	}
+	
+	// WASD movement
+	if (g_theInput->IsKeyDown('W'))
+		moveDir += forward;
+	if (g_theInput->IsKeyDown('S'))
+		moveDir -= forward;
+	if (g_theInput->IsKeyDown('A'))
+		moveDir += left;
+	if (g_theInput->IsKeyDown('D'))
+		moveDir -= left;
+
+	if (m_physicsMode == PhysicsMode::FLYING || m_physicsMode == PhysicsMode::NOCLIP)
+	{
+		if (g_theInput->IsKeyDown('Q'))
+			moveDir.z += 1.0f;
+		if (g_theInput->IsKeyDown('E'))
+			moveDir.z -= 1.0f;
+	}
+	
+	// Apply movement
+	if (moveDir.GetLengthSquared() > 0.0f)
+	{
+		MoveInDirection(moveDir, deltaSeconds);
+	}
 }
 
-Mat44 Player::GetModelToWorldTransform() const
+void Player::UpdateFromController(float deltaSeconds)
 {
-	Mat44 rotate;
-	rotate = m_orientation.GetAsMatrix_IFwd_JLeft_KUp();
-	Mat44 translate;
-	translate = Mat44::MakeTranslation3D(m_position);
+	XboxController const& controller = g_theInput->GetController(0);
+	if (controller.IsButtonDown(XboxButtonID::LS) || controller.IsButtonDown(XboxButtonID::RS))
+	{
+		m_isRunning = true;
+		m_maxSpeed = m_runSpeed;
+		m_flySpeed = m_runSpeed * 2.0f;
+	}
+	
+	// Left stick for movement
+	Vec2 leftStick = controller.GetLeftStick().GetPosition();
+	if (leftStick.GetLengthSquared() > 0.01f)
+	{
+		Vec3 forward = GetForwardVector();
+		Vec3 left = GetLeftVector();
+		
+		// For walking mode, flatten to XY
+		if (m_physicsMode == PhysicsMode::WALKING)
+		{
+			forward.z = 0.0f;
+			if (forward.GetLengthSquared() > 0.0f)
+				forward = forward.GetNormalized();
+			
+			left.z = 0.0f;
+			if (left.GetLengthSquared() > 0.0f)
+				left = left.GetNormalized();
+		}
+		
+		Vec3 moveDir = forward * leftStick.y + left * (-leftStick.x);
+		MoveInDirection(moveDir, deltaSeconds);
+	}
+	
+	// Triggers for vertical movement (flying/noclip only)
+	if (m_physicsMode == PhysicsMode::FLYING || m_physicsMode == PhysicsMode::NOCLIP)
+	{
+		float verticalInput = controller.GetLeftTrigger() - controller.GetRightTrigger();
+		if (fabsf(verticalInput) > 0.01f)
+		{
+			Vec3 moveDir(0.0f, 0.0f, verticalInput);
+			MoveInDirection(moveDir, deltaSeconds);
+		}
+	}
+}
 
-	translate.Append(rotate);
-	return translate;
+void Player::CyclePhysicsMode()
+{
+	int currentMode = (int)m_physicsMode;
+	currentMode = (currentMode + 1) % 3;
+	m_physicsMode = (PhysicsMode)currentMode;
+	
+	// Print mode to console
+	const char* modeNames[] = { "WALKING", "FLYING", "NOCLIP" };
+	//DebuggerPrintf("Physics Mode: %s\n", modeNames[currentMode]);
+	m_playerModeString = Stringf("Physics Mode: %s\n", modeNames[currentMode]);
+}
+
+void Player::CycleCameraMode()
+{
+	if (m_gameCamera)
+	{
+		m_gameCamera->CycleCameraMode();
+	}
 }

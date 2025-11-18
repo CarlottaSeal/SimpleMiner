@@ -199,7 +199,6 @@
     <ClCompile Include="ChunkSerializer.cpp" />
     <ClCompile Include="ChunkUtils.cpp" />
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameCamera.cpp" />
     <ClCompile Include="Gamecommon.cpp" />
     <ClCompile Include="ChunkJob.cpp" />
     <ClCompile Include="Generator\BiomeGenerator.cpp" />
@@ -209,7 +208,99 @@
     <ClCompile Include="Generator\TerrainGenerator.cpp" />
     <ClCompile Include="Generator\WorldGenPipeline.cpp" />
     <ClCompile Include="Main_Windows.cpp" />
+    <ClCompile Include="Physics\Chest.cpp" />
+    <ClCompile Include="Physics\Entity.cpp" />
+    <ClCompile Include="Physics\GameCamera.cpp">
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <AssemblerListingLocation>C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\Temporary\SimpleMiner_x64_Release\</AssemblerListingLocation>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <BrowseInformation>false</BrowseInformation>
+      <BrowseInformationFile>C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\Temporary\SimpleMiner_x64_Release\</BrowseInformationFile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <CompileAs>Default</CompileAs>
+      <UseDynamicDebugging>false</UseDynamicDebugging>
+      <ConformanceMode>true</ConformanceMode>
+      <DiagnosticsFormat>Column</DiagnosticsFormat>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <ErrorReporting>Prompt</ErrorReporting>
+      <ExpandAttributedSource>false</ExpandAttributedSource>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <EnableASAN>false</EnableASAN>
+      <EnableFuzzer>false</EnableFuzzer>
+      <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableVectorLength>NotSet</EnableVectorLength>
+      <FloatingPointModel>Precise</FloatingPointModel>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <GenerateModuleDependencies>false</GenerateModuleDependencies>
+      <GenerateSourceDependencies>false</GenerateSourceDependencies>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard_C>Default</LanguageStandard_C>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ModuleDependenciesFile>C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\Temporary\SimpleMiner_x64_Release\</ModuleDependenciesFile>
+      <ModuleOutputFile>C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\Temporary\SimpleMiner_x64_Release\</ModuleOutputFile>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <Optimization>MaxSpeed</Optimization>
+      <ObjectFileName>C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\Temporary\SimpleMiner_x64_Release\</ObjectFileName>
+      <CallingConvention>Cdecl</CallingConvention>
+      <ProgramDataBaseFileName>C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\Temporary\SimpleMiner_x64_Release\vc143.pdb</ProgramDataBaseFileName>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\Temporary\SimpleMiner_x64_Release\SimpleMiner_Release_x64.pch</PrecompiledHeaderOutputFile>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDll</RuntimeLibrary>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+      <ShowIncludes>false</ShowIncludes>
+      <SourceDependenciesFile>C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\Temporary\SimpleMiner_x64_Release\</SourceDependenciesFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <SpectreMitigation>false</SpectreMitigation>
+      <StructMemberAlignment>Default</StructMemberAlignment>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <TrackerLogDirectory>C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\Temporary\SimpleMiner_x64_Release\SimpleMiner.tlog\</TrackerLogDirectory>
+      <TranslateIncludes>false</TranslateIncludes>
+      <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <UseFullPaths>true</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <XMLDocumentationFileName>C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\Temporary\SimpleMiner_x64_Release\</XMLDocumentationFileName>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <IntelJCCErratum>false</IntelJCCErratum>
+      <BuildStlModules>false</BuildStlModules>
+      <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+      <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+      <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_UNICODE;UNICODE;</PreprocessorDefinitions>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\Code/;C:\Users\carlo\Perforce\ruotongg_IglooPersonal\C34\Students\ruotongg\SD\SimpleMiner\../Engine/Code/</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LinkCompiled>true</LinkCompiled>
+    </ClCompile>
+    <ClCompile Include="Physics\PhysicsUtils.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="UI\ChessScreen.cpp" />
+    <ClCompile Include="UI\CraftingScreen.cpp" />
+    <ClCompile Include="UI\FurnaceScreen.cpp" />
+    <ClCompile Include="UI\GameUIManager.cpp" />
+    <ClCompile Include="UI\HUD.cpp" />
+    <ClCompile Include="UI\InventoryScreen.cpp" />
+    <ClCompile Include="UI\ItemSlot.cpp" />
+    <ClCompile Include="UI\MainMenuScreen.cpp" />
+    <ClCompile Include="UI\PauseMenuScreen.cpp" />
+    <ClCompile Include="UI\SettingsScreen.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -222,7 +313,6 @@
     <ClInclude Include="ChunkUtils.h" />
     <ClInclude Include="EngineBuildPreferences.hpp" />
     <ClInclude Include="Game.hpp" />
-    <ClInclude Include="GameCamera.h" />
     <ClInclude Include="Gamecommon.hpp" />
     <ClInclude Include="ChunkJob.h" />
     <ClInclude Include="Generator\BiomeGenerator.h" />
@@ -231,8 +321,22 @@
     <ClInclude Include="Generator\SurfaceBuilder.h" />
     <ClInclude Include="Generator\TerrainGenerator.h" />
     <ClInclude Include="Generator\WorldGenPipeline.h" />
+    <ClInclude Include="Physics\Chest.h" />
+    <ClInclude Include="Physics\Entity.h" />
+    <ClInclude Include="Physics\GameCamera.h" />
+    <ClInclude Include="Physics\PhysicsUtils.h" />
     <ClInclude Include="Player.hpp" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="UI\ChestScreen.h" />
+    <ClInclude Include="UI\CraftingScreen.h" />
+    <ClInclude Include="UI\FurnaceScreen.h" />
+    <ClInclude Include="UI\GameUIManager.h" />
+    <ClInclude Include="UI\HUD.h" />
+    <ClInclude Include="UI\InventoryScreen.h" />
+    <ClInclude Include="UI\ItemSlot.h" />
+    <ClInclude Include="UI\MainMenuScreen.h" />
+    <ClInclude Include="UI\PauseMenuScreen.h" />
+    <ClInclude Include="UI\SettingsScreen.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>

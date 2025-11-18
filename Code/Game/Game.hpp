@@ -9,6 +9,7 @@
 
 #include "Engine/Renderer/SpriteSheet.hpp"
 
+class GameUIManager;
 class World;
 class Player;
 class Clock;
@@ -38,6 +39,8 @@ public:
 	Player* m_player;
 
 	SpriteSheet* m_spriteSheet; //common spritesheet
+
+	GameUIManager* m_gameUIManager;
 
 	//Debug
 	int m_numOfVerts;
@@ -105,8 +108,8 @@ public:
 	int g_debugVisualizationMode = 0;
 	bool g_showChunkBounds = true; 
 
-private:
 	World* m_currentWorld;
+private:
 
 private:
 	bool m_isSlowMo;
@@ -122,6 +125,10 @@ private:
 	std::vector<Vertex_PCU> m_gridVertexes;
 };
 
+bool Event_ResumeGame(EventArgs& args);
+bool Event_OpenSettings(EventArgs& args);
+bool Event_SaveGame(EventArgs& args);
+bool Event_BackToMainMenu(EventArgs& args);
 
 
 

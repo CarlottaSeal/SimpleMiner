@@ -18,7 +18,9 @@ CaveGenerator::CaveGenerator(unsigned int seed)
 bool CaveGenerator::IsInCave(const Vec3& worldPos, int distanceToSurface, float terrainHeight, 
                              float* outCaveness, CaveType* outDominantType)
 {
-   float seaLevel = (float)g_theGame->g_seaLevel;
+    UNUSED(outDominantType);
+    UNUSED(terrainHeight)
+    //float seaLevel = (float)g_theGame->g_seaLevel;
     
     // Basic bounds checking
     if (worldPos.z < 5 || worldPos.z > 200) return false;
@@ -314,6 +316,7 @@ uint8_t CaveGenerator::DetermineCaveFill(const Vec3& worldPos, float terrainHeig
 
 void CaveGenerator::PostProcessLiquids(Block* blocks, const IntVec2& chunkCoords)
 {
+    UNUSED(chunkCoords)
     // Create more realistic liquid pools by ensuring liquids flow downward
     for (int z = CHUNK_SIZE_Z - 2; z >= 2; z--)
     {

@@ -1,6 +1,5 @@
 ﻿#include "Game.hpp"
 
-
 #include "Block.h"
 #include "Engine/Math/RandomNumberGenerator.hpp"
 #include "Engine/Math/AABB2.hpp"    
@@ -8,7 +7,6 @@
 #include "Engine/Math/Mat44.hpp"
 #include "Engine/Math/MathUtils.hpp"
 #include "Engine/Core/Rgba8.hpp"
-#include "Engine/Core/VertexUtils.hpp"
 #include "Engine/Core/Clock.hpp"
 #include "Engine/Core/DebugRenderSystem.hpp"
 #include "Engine/Renderer/BitmapFont.hpp"
@@ -22,7 +20,9 @@
 #include "Chunk.h"
 #include "ChunkUtils.h"
 #include "World.h"
+#include "Engine/UI/UIManager.h"
 #include "ThirdParty/ImGui/imgui.h"
+#include "UI/GameUIManager.h"
 
 RandomNumberGenerator* g_theRNG = nullptr;
 //extern AudioSystem* g_theAudio;
@@ -38,7 +38,7 @@ Game::Game()
 	m_screenCamera.SetNewAspectRatio(g_theWindow->m_currentAspectRatio, 800.f);
 	//m_screenCamera.SetOrthographicView(Vec2(0.f, 0.f), Vec2(1600.f, 1000.f));
 
-	m_player = new Player(this);
+	m_player = new Player(this, Vec3(-50.f, -50.f, 150.f));
 
 	m_player->m_worldCamera.SetCameraMode(Camera::CameraMode::eMode_Perspective);
 	m_player->m_worldCamera.SetPerspectiveView(2.f, 60.f, 0.1f, 3000.f);
@@ -52,6 +52,12 @@ Game::Game()
 	DebugAddWorldAxisText(mat);
 
 	g_theRNG = new RandomNumberGenerator();
+
+	m_gameUIManager = new GameUIManager(g_theUISystem);
+	g_theEventSystem->SubscribeEventCallBackFunction("ResumeGame", Event_ResumeGame);
+	g_theEventSystem->SubscribeEventCallBackFunction("OpenSettings", Event_OpenSettings);
+	g_theEventSystem->SubscribeEventCallBackFunction("SaveGame", Event_SaveGame);
+	g_theEventSystem->SubscribeEventCallBackFunction("BackToMainMenu", Event_BackToMainMenu);
 }
 
 Game::~Game()
@@ -62,6 +68,8 @@ Game::~Game()
 		m_currentWorld->ForceDeactivateAllChunks();
 	}
 
+	delete m_gameUIManager;
+	m_gameUIManager = nullptr;
 	delete m_player;
 	m_player = nullptr;
 	delete m_spriteSheet;
@@ -257,7 +265,7 @@ void Game::AttractStateRender() const
 
 void Game::GameStateUpdate()
 {
-	XboxController const& controller = g_theInput->GetController(0);
+	//XboxController const& controller = g_theInput->GetController(0);
 
 	if(m_player)
 		m_player->Update((float)s_theSystemClock->GetDeltaSeconds());
@@ -280,8 +288,9 @@ void Game::GameStateUpdate()
 void Game::GameStateRender() const
 {
 	m_currentWorld->Render();
-
+	
 	g_theRenderer->BindTexture(nullptr);
+	m_player->Render();
 	GameAxisDebugRender();
 }
 
@@ -582,6 +591,11 @@ void Game::DebugRenderSystemInputUpdate()
 		typeMsg,
 		Vec2(m_screenCamera.GetOrthographicBottomLeft().x, m_screenCamera.GetOrthographicTopRight().y) -
 		Vec2(0.f, 15.f), 12.f, Vec2::ZERO, 0.f);
+	std::string modeMsg = m_player->m_playerModeString + " " + m_player->m_gameCamera->m_cameraModeString;
+	DebugAddScreenText(
+		modeMsg,
+		Vec2(m_screenCamera.GetOrthographicBottomLeft().x, m_screenCamera.GetOrthographicTopRight().y) -
+		Vec2(0.f, 30.f), 12.f, Vec2::ZERO, 0.f);
 
 	if (m_currentWorld->IsDebuggingPrinting())
 	{
@@ -640,4 +654,33 @@ void Game::DebugAddWorldAxisText(Mat44 worldMat)
 	zMat.SetIJK3D(Vec3(0.f, 0.f, -1.f), Vec3(0.f, 1.f, 0.f), Vec3(1.f, 0.f, 0.f));
 	zMat.Append(worldMat);
 	DebugAddWorldText("z-Up", zMat, 0.2f, Vec2(-0.3f, 1.5f), -1.f, Rgba8::AQUA);
+}
+
+bool Event_ResumeGame(EventArgs& args)
+{
+	UNUSED(args);
+	g_theGame->m_gameUIManager->ClosePauseMenu();
+	return true;
+}
+
+bool Event_OpenSettings(EventArgs& args)
+{
+	UNUSED(args);
+	g_theGame->m_gameUIManager->OpenSettings();
+	return true;
+}
+
+bool Event_SaveGame(EventArgs& args)
+{
+	UNUSED(args);
+	g_theGame->m_gameUIManager->ShowActionMessage("Game Saved!", 2.0f);
+	return true;
+}
+
+bool Event_BackToMainMenu(EventArgs& args)
+{
+	UNUSED(args);
+	g_theGame->m_gameUIManager->CloseAllScreens();
+	g_theGame->m_gameUIManager->OpenMainMenu();
+	return true;
 }

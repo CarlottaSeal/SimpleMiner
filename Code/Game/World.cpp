@@ -1537,11 +1537,11 @@ void World::UpdateDiggingAndPlacing(float deltaSeconds)
         return;
     }
     
-    Vec3 cameraPos = m_owner->m_player->m_position;
+    Vec3 cameraPos = m_owner->m_player->m_gameCamera->GetPosition();
     Vec3 cameraForward;
     Vec3 cameraLeft;
     Vec3 cameraUp;
-    m_owner->m_player->m_orientation.GetAsVectors_IFwd_JLeft_KUp(cameraForward, cameraLeft, cameraUp);
+    m_owner->m_player->m_gameCamera->GetOrientation().GetAsVectors_IFwd_JLeft_KUp(cameraForward, cameraLeft, cameraUp);
     float maxRaycastDistance = 10.0f; 
     
     m_currentRaycast = RaycastVsBlocks(cameraPos, cameraForward, maxRaycastDistance);

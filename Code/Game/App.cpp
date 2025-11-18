@@ -81,7 +81,14 @@ App::App()
 	g_theJobSystem = new JobSystem(jobSystemConfig);
 
 	SaveConfig saveConfig;
-	g_theSaveSystem = new SaveSystem(saveConfig);	
+	g_theSaveSystem = new SaveSystem(saveConfig);
+
+	UIConfig uiConfig;
+    uiConfig.m_window = g_theWindow;
+    uiConfig.m_renderer = g_theRenderer;
+    uiConfig.m_inputSystem = g_theInput;
+    uiConfig.m_bitmapFontName = "SquirrelFixedFont";
+    g_theUISystem = new UISystem(uiConfig);
 
 	DebugRenderConfig debugRenderConfig;
 	debugRenderConfig.m_renderer = g_theRenderer;
@@ -93,6 +100,7 @@ App::App()
 	g_theDevConsole->Startup();
 	g_theInput->Startup();
 	g_theJobSystem->Startup();
+    g_theUISystem->Startup();
 	DebugRenderSystemStartup(debugRenderConfig);
 
 	g_theGame = new Game();
@@ -116,7 +124,8 @@ void App::Shutdown()
 	g_theJobSystem->Shutdown();
 	delete g_theGame;
 	g_theGame = nullptr;
-	
+
+	g_theUISystem->Shutdown();
 	g_theEventSystem->Shutdown();
 	//g_theAudio->Shutdown();
 	g_theRenderer->ShutDown();
@@ -154,6 +163,7 @@ void App::BeginFrame()
 	g_theRenderer->BeginFrame();
 	//g_theAudio->BeginFrame();
 	g_theEventSystem->BeginFrame();
+	g_theUISystem->BeginFrame();
 	g_theDevConsole->BeginFrame();
 
 	DebugRenderBeginFrame();
@@ -251,6 +261,7 @@ void App::EndFrame()
 	g_theInput->EndFrame();
 	//g_theAudio->EndFrame();
 	g_theEventSystem->EndFrame();
+	g_theUISystem->EndFrame();
 	g_theDevConsole->EndFrame();
 
 	for (int i = 0; i < 256; ++i)
